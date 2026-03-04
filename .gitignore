@@ -1,0 +1,6 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# User-specific config (lives in ~/.claude/, not in repo)
+triage-config.md
