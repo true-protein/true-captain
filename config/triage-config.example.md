@@ -23,9 +23,11 @@
 
 <!-- Add sender patterns or subject keywords to always skip -->
 
+<!-- Common patterns are already built into the classification rules.
+     Add any extra patterns specific to your inbox here. -->
+
 - notifications@github.com
-- noreply@slack.com
-- Subject contains: [Jira], [GitHub], automated report, unsubscribe
+- Subject contains: automated report
 
 ## Scheduling Preferences
 
@@ -55,12 +57,20 @@
 - Teams: yes
 - Asana: yes
 
-## Skip Handling
+## Skip Folders
 
-<!-- What to do with skipped items (notifications, newsletters, automated alerts) -->
+<!-- Skipped emails are moved to these folders for inbox hygiene.
+     The classification rules auto-detect which folder each email belongs in.
+     Customise the folder names below, or add/remove categories. -->
 
-- **Show skip summary after briefing:** yes
-- **Auto-archive when available:** no
+- **Notifications:** GitHub, Jira, Confluence, Asana, Slack, Linear
+- **Marketing:** newsletters, promos, vendor marketing
+- **Calendar:** meeting responses (accepted, declined, tentative)
+- **Reports:** automated reports, CI/CD, backups
+- **Payments:** invoices, receipts, billing
+
+<!-- Set to "no" to skip the folder-move step and just list skipped items -->
+- **Move skipped emails to folders:** yes
 
 ## Weekly Summary Preferences
 

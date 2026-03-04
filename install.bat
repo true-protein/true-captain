@@ -1,13 +1,13 @@
 @echo off
 REM
-REM True Utilities Installer (Windows)
+REM True Captain Installer (Windows)
 REM
 REM Installs Claude Code skills to %USERPROFILE%\.claude\skills\
 REM so they work from any directory. Run this once after downloading.
 REM
 
 echo.
-echo   True Utilities Installer  (v%VERSION%)
+echo   True Captain Installer  (v%VERSION%)
 echo   ========================
 echo.
 
@@ -23,7 +23,7 @@ if exist "%VERSION_FILE%" (
 
 if not exist "%SKILLS_SOURCE%" (
     echo   Error: Could not find skills in %SKILLS_SOURCE%
-    echo   Make sure you're running this from the true-utils directory.
+    echo   Make sure you're running this from the true-captain directory.
     exit /b 1
 )
 

@@ -3,7 +3,7 @@
 ## General Principles
 
 - **Draft only, never send** — all replies are drafts for the user to review
-- **No signature** — Outlook appends the user's signature automatically
+- **No signature** — the user's mail client appends their signature automatically
 - **Match the thread's tone** — if the sender is formal, reply formally; if casual, match that
 - **Be concise** — executives value brevity; get to the point
 - **Australian English** — use `organise`, `colour`, `recognise`, etc.
@@ -30,7 +30,7 @@ Two things I'd flag:
 
 Happy to jump on a call this week if you'd like to discuss.
 
-[signature auto-appended by Outlook]
+[signature auto-appended by mail client]
 ```
 
 ## Internal Communication (team, direct reports, peers)

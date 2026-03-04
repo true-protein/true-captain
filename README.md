@@ -44,13 +44,15 @@ Every message is classified as **skip** (noise), **info_only** (FYI), **meeting_
 
 ## Quick Start
 
-### Option A: One-liner install
+### 1. Install
+
+**Option A: One-liner**
 
 ```bash
 bash <(curl -s https://raw.githubusercontent.com/true-protein/true-captain/main/install-remote.sh)
 ```
 
-### Option B: Clone and install
+**Option B: Clone and install**
 
 ```bash
 git clone https://github.com/true-protein/true-captain.git
@@ -97,9 +99,12 @@ Interactive onboarding — configures your name, role, VIP senders, skip pattern
 | Command | What it does |
 |---------|-------------|
 | `/true` | List all commands and current version |
-| `/true setup` | Interactive setup and configuration |
+| `/true setup` | Interactive setup (menu if already configured) |
+| `/true setup vip` | Jump to VIP senders config |
+| `/true setup <section>` | Jump to a section: `identity`, `vip`, `skip`, `schedule`, `tone`, `channels`, `platform` |
 | `/triage` | Full briefing: email + Slack + Teams + Asana + calendar |
 | `/triage check` | Classify only, no drafting |
+| `/triage draft` | Classify + draft replies (skip the "want me to draft?" prompt) |
 | `/triage 2h` | Last 2 hours (also `4h`, `1d`, `yesterday`) |
 | `/mail` | Email-only triage |
 | `/reply <search>` | Draft a reply to a specific email |
@@ -115,7 +120,7 @@ Every message is sorted into one of four buckets:
 
 | Category | Examples | Action |
 |----------|----------|--------|
-| **skip** | GitHub notifications, newsletters, automated alerts | Grouped for bulk cleanup |
+| **skip** | GitHub notifications, newsletters, automated alerts | Moved to folders (Notifications, Marketing, etc.) |
 | **info_only** | CC'd emails, FYI, receipts | One-line summary |
 | **meeting_info** | Calendar invites, meeting links | Cross-referenced with calendar |
 | **action_required** | Direct questions, requests, VIP emails | Prioritised, draft reply offered |
@@ -130,7 +135,7 @@ The skills auto-detect which MCP connectors are available and use the right tool
 |----------|--------------|-----------------|
 | Search email | `outlook_email_search` | `gmail_search_messages` |
 | Read email | `read_resource` | `gmail_read_message` |
-| Calendar | `outlook_calendar_search` | `gcal_list_events` |
+| Calendar events | `outlook_calendar_search` | `gcal_list_events` |
 | Find availability | `find_meeting_availability` | `gcal_find_meeting_times` |
 | Create draft | Copy to Outlook | `gmail_create_draft` |
 
@@ -140,18 +145,21 @@ All email replies are **drafts only** — Claude never sends on your behalf with
 
 Slack messages can be sent directly with your explicit approval.
 
-### Skip handling
+### Inbox hygiene
 
-Skipped items (notifications, newsletters, automated alerts) are grouped by source after the briefing:
+Skipped emails are automatically sorted into folders to keep your inbox clean:
 
 ```
-14 emails were skipped:
-  9x GitHub, 3x Asana, 2x newsletters
+14 emails can be sorted out of your inbox:
 
-Want me to summarise them for bulk cleanup?
+  Notifications (9): GitHub ×6, Asana ×3
+  Marketing (3): Newsletter A, Vendor B, Promo C
+  Calendar (2): meeting responses
+
+→ [Move all] [Show details] [Leave in inbox]
 ```
 
-When write permissions are available (`Mail.ReadWrite` for Outlook, `Gmail.Modify` for Gmail), auto-archive is supported.
+Default folders: **Notifications**, **Marketing**, **Calendar**, **Reports**, **Payments**. Customise in your config. Requires `Mail.ReadWrite` (Outlook) or `gmail.modify` (Gmail) — without these, you get a grouped list for manual cleanup.
 
 ### Asana integration
 
@@ -164,6 +172,7 @@ Your personal config lives at `~/.claude/triage-config.md`. Run `/true setup` to
 The config controls:
 - **VIP senders** — always high priority
 - **Skip patterns** — auto-skip noise (GitHub, Jira, newsletters)
+- **Skip folders** — where to move skipped emails (Notifications, Marketing, Calendar, Reports, Payments)
 - **Scheduling preferences** — work hours, meeting buffer, slots to offer
 - **Communication tone** — external (professional/warm) vs internal (direct/casual)
 - **Channels** — which tools to include in `/triage`
@@ -180,11 +189,12 @@ The skills work in **read-only mode** out of the box. For full functionality, ad
 | Permission | Required | Enables |
 |------------|----------|---------|
 | `Mail.Read` | Yes | Read inbox |
-| `Mail.ReadWrite` | Optional | Auto-archive skipped emails, move to folders |
+| `Mail.ReadWrite` | Optional | Move skipped emails to folders |
 | `Mail.Send` | Optional | Send replies directly from Claude |
 | `Calendars.Read` | Yes | Read calendar |
 | `Calendars.ReadWrite` | Optional | Create calendar events for proposed meeting times |
 | `Chat.Read` | Optional | Read Teams chat messages |
+| `Chat.ReadWrite` | Optional | Send replies in Teams chats |
 
 These are **delegated** permissions — Claude can only access what the signed-in user can access. An Entra ID admin grants these via **Identity > Applications > Enterprise applications > [app] > Permissions > Grant admin consent**.
 
@@ -193,7 +203,7 @@ These are **delegated** permissions — Claude can only access what the signed-i
 | Scope | Required | Enables |
 |-------|----------|---------|
 | `gmail.readonly` | Yes | Read inbox |
-| `gmail.modify` | Optional | Archive skipped emails, manage labels |
+| `gmail.modify` | Optional | Move skipped emails to labels/folders |
 | `gmail.compose` | Optional | Create draft replies |
 | `gmail.send` | Optional | Send replies directly from Claude |
 | `calendar.readonly` | Yes | Read calendar |
@@ -241,4 +251,4 @@ MIT
 
 ---
 
-Made with :heart: by TrueTech
+Made with ❤️ by TrueTech

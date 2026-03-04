@@ -89,7 +89,7 @@ gcal_list_events:
 slack_search_public:
   query: "to:me after:{week_start_date}"
   sort: "timestamp"
-  limit: 30
+  limit: 20
 ```
 
 ### Teams Highlights
@@ -100,6 +100,17 @@ chat_message_search:
   afterDateTime: "{week_start_iso}"
   limit: 30
 ```
+
+### Asana
+
+```
+get_tasks:
+  assignee: "me"
+  opt_fields: "name,due_on,completed,modified_at,projects.name"
+  limit: 50
+```
+
+Filter to tasks modified within the week range.
 
 ---
 
@@ -193,7 +204,7 @@ Items to tie up before the weekend (or start of next week):
 
 > "Want me to help with any of the loose ends? I can draft replies for the pending items."
 
-If yes, process each pending item using the same draft flow as `/triage`.
+If yes, process each pending item using the same draft flow as `/triage` (including graceful degradation for permissions).
 
 ---
 

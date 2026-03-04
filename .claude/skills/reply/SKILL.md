@@ -102,13 +102,21 @@ Note the thread context so the reply is informed.
 
 4. If user says **Edit**, ask what to change, redraft.
 5. If user says **Redo**, generate a fresh alternative.
-6. If user says **Approve**, confirm the draft is ready. Remind them to paste it into Outlook and send.
+6. If user says **Approve** — attempt the best available action, degrade if permissions are missing:
+
+   **Gmail:**
+   - Try `gmail_create_draft` → if success: "Draft saved to Gmail Drafts."
+   - If permission error: *"Here's your draft. I'd save this to Gmail Drafts, but `gmail.compose` isn't enabled."*
+   - If draft saved, offer to send → if `gmail.send` missing: *"Draft saved. I'd send it directly, but `gmail.send` isn't enabled. Open Drafts and hit send."*
+
+   **Outlook:**
+   - Present draft for the user to copy into Outlook
+   - Note: *"With `Mail.Send`, I could send this directly. With `Mail.ReadWrite`, I could save it to Drafts."*
 
 ---
 
 ## Notes
 
-- Email replies are always drafts. Never attempt to send without explicit approval.
-- For Gmail, approved drafts can be created directly via `gmail_create_draft`.
-- For Outlook, drafts are presented for the user to copy into Outlook.
+- Email replies are always drafts first. Never send without explicit user approval.
+- **Graceful degradation**: Always attempt the best action. If a permission error occurs, show the draft text and explain which permission is needed.
 - If the user provides no argument, ask: "Which email do you want to reply to? Give me a sender name, subject, or keyword."

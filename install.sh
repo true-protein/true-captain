@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# True Utilities Installer
+# True Captain Installer
 #
 # Installs Claude Code skills to ~/.claude/skills/ so they work
 # from any directory. Run this once after downloading.
@@ -19,14 +19,14 @@ if [ -f "$VERSION_FILE" ]; then
 fi
 
 echo ""
-echo "  True Utilities Installer  (v$VERSION)"
+echo "  True Captain Installer  (v$VERSION)"
 echo "  ========================"
 echo ""
 
 # Check source exists
 if [ ! -d "$SKILLS_SOURCE" ]; then
     echo "  Error: Could not find skills in $SKILLS_SOURCE"
-    echo "  Make sure you're running this from the true-utils directory."
+    echo "  Make sure you're running this from the true-captain directory."
     exit 1
 fi
 

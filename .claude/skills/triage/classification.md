@@ -2,22 +2,30 @@
 
 Classify each item into one of four categories. Apply top-to-bottom — first match wins.
 
-## 1. skip (flagged for batch cleanup)
+## 1. skip (noise — moved to folders for inbox hygiene)
 
-- From contains `noreply`, `no-reply`, `notification`, `alert`, `mailer-daemon`
-- From contains `@github.com`, `@slack.com`, `@jira`, `@notion.so`, `@atlassian.com`, `@asana.com`
-- Subject contains `[GitHub]`, `[Slack]`, `[Jira]`, `[Confluence]`, `[Asana]`
-- Automated reports, system notifications, build alerts
-- Marketing newsletters, promotional content
-- Service receipts where no action is needed
+Each skipped email is routed to a target folder based on its type. The folder mapping comes from the user's config (`Skip Folders` section) with these defaults:
 
-**Note:** Skipped items are grouped by source and presented for optional bulk cleanup (see Step 3.5 in triage flow). Auto-archive will be available once Mail.ReadWrite permissions are granted.
+| Pattern | Folder | Examples |
+|---------|--------|----------|
+| `@github.com`, `@atlassian.com`, `@jira`, `@asana.com`, `@notion.so`, `@slack.com`, `@linear.app` | **Notifications** | GitHub, Jira, Confluence, Asana, Slack email alerts |
+| `noreply`, `no-reply`, `notification`, `alert`, `mailer-daemon` | **Notifications** | Generic automated senders |
+| Subject contains `[GitHub]`, `[Jira]`, `[Confluence]`, `[Asana]`, `[Slack]` | **Notifications** | Bracketed app notifications |
+| Newsletter, promotional, marketing, `unsubscribe` in body/headers | **Marketing** | Newsletters, vendor promos |
+| Subject starts with `Accepted:`, `Declined:`, `Tentative:`, `Invitation:`, `Canceled:` | **Calendar** | Meeting responses and invites |
+| Automated reports, build alerts, scheduled summaries | **Reports** | Looker, CI/CD, backup reports |
+| Automated invoice/receipt from `noreply` or known billing systems | **Payments** | Transactional receipts from billing systems |
+| All other skip matches | **Notifications** | Default folder for unmatched skip items |
+
+After classification, skipped emails are grouped by target folder and presented in Step 3.5 for the user to confirm before moving.
+
+**Folder creation:** If a target folder doesn't exist, create it automatically (when permissions allow).
 
 ## 2. info_only (show summary, no reply needed)
 
 - User is in CC (not direct recipient in To:)
 - Internal FYI emails, shared documents, announcements
-- Receipts, invoices (informational)
+- Receipts or invoices from real people (not automated noreply senders)
 - Auto-replies to user's own inquiries
 - Thread where user already replied and no new question was asked
 

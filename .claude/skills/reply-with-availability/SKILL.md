@@ -81,6 +81,8 @@ Search the next 14 days for free slots. Detect which calendar connector is avail
 
 **If Microsoft 365 (Outlook Calendar):**
 
+Note: `find_meeting_availability` requires at least one other participant, so for single-user availability we list events and identify gaps.
+
 ```
 outlook_calendar_search:
   query: "*"
@@ -182,12 +184,27 @@ Let me know what suits{" and I'll send through a calendar invite" if user is org
 
 ## Step 5: Post-Approval
 
-When user approves:
+When user approves, attempt the best available actions and degrade gracefully:
 
-1. Remind user to paste the reply into Outlook and send
-2. If calendar write permissions are available:
-   - Offer to create tentative calendar events for all proposed slots
-   - When a date is confirmed later, clean up the unused tentative events
+### Send the reply
+
+**Gmail:**
+- Try `gmail_create_draft` → if success, offer to send → try send
+- If `gmail.compose` missing: *"Here's your scheduling reply. I'd save it to Drafts, but `gmail.compose` isn't enabled."*
+- If `gmail.send` missing: *"Draft saved. I'd send it directly, but `gmail.send` isn't enabled. Open Drafts and hit send."*
+
+**Outlook:**
+- Present reply for the user to copy
+- *"With `Mail.Send`, I could send this directly."*
+
+### Create tentative calendar events
+
+Offer to block the proposed times on the user's calendar:
+
+- Try `gcal_create_event` (Google) or equivalent (M365)
+- If success: "Created tentative events for all {N} proposed slots."
+- If permission error: *"I'd create tentative calendar events for the proposed times, but `Calendars.ReadWrite` (Outlook) / `calendar.events` (Google) isn't enabled. Add them manually, or ask your admin to enable `{permission}`."*
+- When a date is confirmed later, clean up the unused tentative events
 
 ---
 
@@ -196,4 +213,5 @@ When user approves:
 - Times are always shown in the user's configured timezone with the timezone label
 - If the other person is in a different timezone, note both timezones in the reply
 - Never commit to times on the user's behalf — always draft for review
+- **Graceful degradation**: Always attempt actions. If permissions are missing, explain what would have happened and which permission is needed.
 - If no slots are available in the next 14 days, say so and ask if the user wants to search further out

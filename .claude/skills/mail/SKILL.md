@@ -18,7 +18,7 @@ Email-only version of `/triage`. Classify inbox, prioritise what needs attention
 
 Read `~/.claude/triage-config.md` for VIP senders, skip patterns, tone preferences, and timezone.
 
-If not found, tell the user to copy from `config/triage-config.example.md`.
+If not found, tell the user to run `/true setup` first.
 
 ---
 
@@ -32,6 +32,7 @@ Detect which email connector is available and fetch accordingly.
 outlook_email_search:
   query: "*"
   folderName: "Inbox"
+  afterDateTime: "{today_midnight_iso}"
   limit: 50
 ```
 
@@ -75,7 +76,7 @@ Classify each email as: **skip**, **info_only**, **meeting_info**, or **action_r
 # Inbox Triage — {date}
 
 ### Skipped ({count})
-- sender — subject
+_{count} items — see inbox hygiene below_
 
 ### Info Only ({count})
 - sender — subject — one-line summary
@@ -98,21 +99,41 @@ Classify each email as: **skip**, **info_only**, **meeting_info**, or **action_r
 
 ---
 
-## Step 3.5: Skipped Items — Batch Action
+## Step 3.5: Inbox Hygiene — Move Skipped Emails to Folders
 
-If skip_count > 0, present the skipped items grouped by sender and ask:
+If skip_count > 0, present skipped emails grouped by target folder:
 
-> "{skip_count} emails were skipped (notifications, newsletters, automated alerts).
-> Want me to summarise them for bulk cleanup?"
+> "{skip_count} emails can be sorted out of your inbox:"
 >
-> → [Show summary for manual archive] [Leave as-is]
+> | Folder | Count | Top senders |
+> |--------|-------|-------------|
+> | Notifications | 9 | GitHub (6), Asana (3) |
+> | Marketing | 3 | Newsletter A, Vendor B |
+> | Calendar | 2 | Meeting responses |
+>
+> → [Move all] [Show details] [Leave in inbox]
 
-If "Show summary":
-- Group by sender/type (e.g. "12× GitHub, 5× Asana, 3× newsletters")
-- List senders with counts so user can bulk-select in their mail client
-- Note: "Auto-archive will be available once Mail.ReadWrite (Outlook) or Gmail.Modify (Google) permissions are granted. For now, you can select these in your mail client and archive/delete in bulk."
+**If "Move all":**
+- Attempt to move emails to their target folders
+- Create folders that don't exist yet
+- If it succeeds → "Moved {N} emails to {X} folders."
+- If permission error → degrade gracefully:
 
-If argument is `check`, stop here (after skip summary).
+  > "I'd move these {N} emails for you, but `Mail.ReadWrite` (Outlook) / `gmail.modify` (Gmail) isn't enabled.
+  > Here's the breakdown so you can sort them manually:
+  >
+  > **Notifications** (9): GitHub ×6, Asana ×3
+  > **Marketing** (3): Newsletter A, Vendor B, Promo C
+  >
+  > Enable `{permission}` to unlock automatic inbox sorting."
+
+**If "Show details":**
+- List every skipped email with its target folder
+- Then re-offer [Move all] [Leave in inbox]
+
+**Folder mapping** comes from the user's config (`Skip Folders` section). See [classification.md](../triage/classification.md) for defaults.
+
+If argument is `check`, stop here (classify + inbox hygiene only — no drafting).
 
 ---
 
@@ -126,15 +147,37 @@ For each action_required email:
 2. Check for scheduling keywords → if found, check calendar
 3. Draft a reply following [tone-guide.md](../triage/tone-guide.md)
 4. Present draft to user with [Approve] [Edit] [Skip] options
-5. Wait for user decision before proceeding to next
+5. **On Approve** — attempt the best available action, degrade if permissions are missing:
 
-**No signature** — your mail client appends it automatically. For Gmail, approved drafts can be created directly via `gmail_create_draft`.
+   **Gmail:**
+   - Try `gmail_create_draft` → if success: "Draft saved to Gmail."
+   - If permission error: *"Here's your draft. I'd save this to your Gmail Drafts, but `gmail.compose` isn't enabled."*
+   - If draft saved, offer to send → try send, degrade if `gmail.send` missing: *"Draft saved. I'd send it directly, but `gmail.send` isn't enabled. Open Drafts and hit send."*
+
+   **Outlook:**
+   - Present draft text for the user to copy
+   - Note: *"With `Mail.Send`, I could send this directly. With `Mail.ReadWrite`, I could save it to your Drafts."*
+
+6. Wait for user decision before proceeding to next
+
+**No signature** — your mail client appends it automatically.
 
 ---
 
 ## Step 5: Summary
 
 ```
-Inbox triage complete. Drafted {N}, approved {N}, skipped {N}.
-Pending: {list any skipped items for later}
+Inbox triage complete.
+- Drafted: {N}
+- Saved to Drafts: {N}
+- Sent: {N}
+- Pending (copy to mail client): {N}
+- Moved to folders: {N} skipped items
+```
+
+If any actions were blocked by missing permissions, add:
+
+```
+Some actions were limited by missing permissions:
+- {action}: needs `{permission}`
 ```
