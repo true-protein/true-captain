@@ -31,7 +31,7 @@ Classify each item into one of four categories. Apply top-to-bottom — first ma
 
 ### meeting_info processing:
 1. Extract: date/time, meeting link, location, title, attendees
-2. Cross-reference with calendar via `outlook_calendar_search`
+2. Cross-reference with calendar via `outlook_calendar_search` (M365) or `gcal_list_events` (Google)
 3. Report gaps: missing link, missing location, no matching calendar event
 4. If event exists with all info → mark as resolved
 

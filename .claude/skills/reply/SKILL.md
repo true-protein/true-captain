@@ -22,12 +22,22 @@ Read `~/.claude/triage-config.md` for tone preferences and timezone.
 
 ## Step 1: Find the Email
 
-Use the argument to search for the email:
+Use the argument to search for the email. Detect which email connector is available.
+
+**If Microsoft 365 (Outlook) is available:**
 
 ```
 outlook_email_search:
   query: "$ARGUMENTS"
   limit: 10
+```
+
+**If Google Workspace (Gmail) is available:**
+
+```
+gmail_search_messages:
+  q: "$ARGUMENTS"
+  maxResults: 10
 ```
 
 If multiple results match, present a numbered list and ask the user to pick:
@@ -46,14 +56,23 @@ Which one?
 
 ## Step 2: Read Full Thread
 
-Once the email is identified, read the full message:
+Once the email is identified, read the full message.
+
+**If Microsoft 365:**
 
 ```
 read_resource:
   uri: "mail:///messages/{messageId}"
 ```
 
-If the email is part of a thread, note the thread context so the reply is informed.
+**If Gmail:**
+
+```
+gmail_read_thread:
+  threadId: "{threadId}"
+```
+
+Note the thread context so the reply is informed.
 
 ---
 
@@ -89,5 +108,7 @@ If the email is part of a thread, note the thread context so the reply is inform
 
 ## Notes
 
-- Email replies are always drafts. Never attempt to send.
+- Email replies are always drafts. Never attempt to send without explicit approval.
+- For Gmail, approved drafts can be created directly via `gmail_create_draft`.
+- For Outlook, drafts are presented for the user to copy into Outlook.
 - If the user provides no argument, ask: "Which email do you want to reply to? Give me a sender name, subject, or keyword."

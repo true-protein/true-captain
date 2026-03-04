@@ -27,12 +27,22 @@ Read `~/.claude/triage-config.md` for:
 
 ## Step 1: Find the Email
 
-Search for the email using the argument:
+Search for the email using the argument. Detect which email connector is available.
+
+**If Microsoft 365 (Outlook) is available:**
 
 ```
 outlook_email_search:
   query: "$ARGUMENTS"
   limit: 10
+```
+
+**If Google Workspace (Gmail) is available:**
+
+```
+gmail_search_messages:
+  q: "$ARGUMENTS"
+  maxResults: 10
 ```
 
 If multiple matches, present a list and ask the user to pick.
@@ -47,9 +57,18 @@ Read the full email to understand:
 - Other attendees mentioned
 - Any constraints ("before end of month", "mornings only", etc.)
 
+**If Microsoft 365:**
+
 ```
 read_resource:
   uri: "mail:///messages/{messageId}"
+```
+
+**If Gmail:**
+
+```
+gmail_read_thread:
+  threadId: "{threadId}"
 ```
 
 ---
@@ -58,7 +77,9 @@ read_resource:
 
 ### If only the user's calendar matters:
 
-Search the next 14 days for free slots:
+Search the next 14 days for free slots. Detect which calendar connector is available.
+
+**If Microsoft 365 (Outlook Calendar):**
 
 ```
 outlook_calendar_search:
@@ -68,11 +89,23 @@ outlook_calendar_search:
   limit: 50
 ```
 
+**If Google Workspace (Google Calendar):**
+
+```
+gcal_find_my_free_time:
+  calendarIds: ["primary"]
+  timeMin: "{today_start_iso}"
+  timeMax: "{today_plus_14_days_iso}"
+  timeZone: "{user_timezone}"
+```
+
 Identify gaps that match the user's work hours and preferences.
 
 ### If other attendees are mentioned:
 
-Use mutual availability check:
+Use mutual availability check.
+
+**If Microsoft 365:**
 
 ```
 find_meeting_availability:
@@ -80,6 +113,17 @@ find_meeting_availability:
   duration: {duration_minutes}
   afterDateTime: "{today_start_utc}"
   beforeDateTime: "{today_plus_14_days_utc}"
+  timeZone: "{user_timezone}"
+```
+
+**If Google Workspace:**
+
+```
+gcal_find_meeting_times:
+  attendees: ["{attendee1_email}", "{attendee2_email}"]
+  duration: {duration_minutes}
+  timeMin: "{today_start_iso}"
+  timeMax: "{today_plus_14_days_iso}"
   timeZone: "{user_timezone}"
 ```
 

@@ -9,15 +9,15 @@
 
 - **Name:** Your Name
 - **Role:** Your role (e.g., CFO, Head of Engineering, Marketing Manager)
-- **Email:** your.email@trueprotein.com.au
+- **Email:** your.email@company.com
 - **Timezone:** Australia/Sydney
 
 ## VIP Senders (always action_required, always high priority)
 
 <!-- Add email addresses or domains of people whose emails should never be missed -->
 
-- ceo@trueprotein.com.au
-- board@trueprotein.com.au
+- ceo@company.com
+- board@company.com
 
 ## Skip Patterns (auto-skip, don't even show in triage)
 
@@ -40,11 +40,17 @@
 - **External:** Professional, warm, concise
 - **Internal:** Direct, casual
 
+## Email Platform
+
+<!-- Which email/calendar platform to use. The skills auto-detect, but you can force one. -->
+
+- **Platform:** auto (auto | microsoft365 | google)
+
 ## Channels to Include in /triage
 
 <!-- Which communication channels to scan during full triage -->
 
-- Outlook email: yes
+- Email: yes
 - Slack: yes
 - Teams: yes
 - Asana: yes

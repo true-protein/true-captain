@@ -1,6 +1,6 @@
 ---
 name: triage
-description: "Morning briefing — classify and prioritise Outlook email, Slack, Teams, and Asana. Surfaces what needs attention, drafts replies for action-required items."
+description: "Morning briefing — classify and prioritise email (Outlook or Gmail), Slack, Teams, and Asana. Surfaces what needs attention, drafts replies for action-required items."
 argument-hint: "[check|draft|all|2h|4h|1d|yesterday|since monday]"
 ---
 
@@ -13,6 +13,21 @@ Arguments: $ARGUMENTS
 Fetch email, Slack, Teams, Asana, and calendar data. Classify all messages and tasks, surface what needs attention, and draft replies for action-required items.
 
 **Goal:** Zero undecided items — every message gets a classification and every action-required item gets a draft reply before the briefing ends.
+
+### Tool Detection
+
+Before fetching, detect which MCP connectors are available. The skill supports both Microsoft 365 and Google Workspace:
+
+| Function | Microsoft 365 | Google Workspace |
+|----------|--------------|-----------------|
+| Email search | `outlook_email_search` | `gmail_search_messages` |
+| Read email | `read_resource` (uri: `mail:///messages/{id}`) | `gmail_read_message` |
+| Read thread | `read_resource` (uri: `mail:///messages/{id}`) | `gmail_read_thread` |
+| Calendar events | `outlook_calendar_search` | `gcal_list_events` |
+| Free/busy | `find_meeting_availability` | `gcal_find_meeting_times` |
+| Draft reply | `outlook_email_search` + copy to Outlook | `gmail_create_draft` |
+
+Use whichever tools are available. If both are present, prefer the one matching the user's config. If neither email tool is available, skip the email steps and note it in the briefing.
 
 ---
 
@@ -58,9 +73,9 @@ If the time range is large (>24h), focus the summary on **action_required** and 
 
 **Launch all applicable fetches simultaneously using Task agents. Use the resolved time range from Step 0.5 as `afterDateTime` for all searches.**
 
-### 1a: Outlook Email
+### 1a: Email (Outlook or Gmail)
 
-Search for emails within the time range:
+**If Microsoft 365 (Outlook) is available:**
 
 ```
 outlook_email_search:
@@ -70,11 +85,26 @@ outlook_email_search:
   limit: 50
 ```
 
-For emails that need more context (multi-message threads, action_required candidates), read the full message:
+For emails that need more context, read the full message:
 
 ```
 read_resource:
   uri: "mail:///messages/{messageId}"
+```
+
+**If Google Workspace (Gmail) is available:**
+
+```
+gmail_search_messages:
+  q: "in:inbox after:{resolved_start_date_yyyy/mm/dd}"
+  maxResults: 50
+```
+
+For emails that need more context, read the full message:
+
+```
+gmail_read_message:
+  messageId: "{messageId}"
 ```
 
 ### 1b: Slack
@@ -105,9 +135,9 @@ chat_message_search:
   limit: 50
 ```
 
-### 1d: Calendar
+### 1d: Calendar (Outlook or Google)
 
-Fetch today's schedule for cross-referencing:
+**If Microsoft 365 (Outlook Calendar) is available:**
 
 ```
 outlook_calendar_search:
@@ -115,6 +145,15 @@ outlook_calendar_search:
   afterDateTime: "today"
   beforeDateTime: "tomorrow"
   limit: 30
+```
+
+**If Google Workspace (Google Calendar) is available:**
+
+```
+gcal_list_events:
+  timeMin: "{today_start_iso}"
+  timeMax: "{today_end_iso}"
+  maxResults: 30
 ```
 
 ### 1e: Asana
@@ -249,7 +288,7 @@ If skip_count > 0, present the skipped items grouped by source and ask:
 If "Show summary":
 - Group by sender/type (e.g. "12× GitHub, 5× Asana, 3× newsletters")
 - List senders with counts so user can bulk-select in Outlook
-- Note: "Auto-archive will be available once Mail.ReadWrite permissions are granted. For now, you can select these in Outlook and archive/delete in bulk."
+- Note: "Auto-archive will be available once Mail.ReadWrite (Outlook) or Gmail.Modify (Google) permissions are granted. For now, you can select these in your mail client and archive/delete in bulk."
 
 If Mail.ReadWrite permissions become available (future):
 - Offer [Archive all] [Move to folder] [Leave as-is]
@@ -269,10 +308,7 @@ If user agrees (or if argument was `draft` or `all`), process each action-requir
 
 1. **Read the full thread** if not already loaded
 
-2. **Check for scheduling keywords** — if detected, check calendar availability:
-   ```
-   find_meeting_availability or outlook_calendar_search
-   ```
+2. **Check for scheduling keywords** — if detected, check calendar availability using whichever calendar tool is available (`find_meeting_availability`/`outlook_calendar_search` for M365, `gcal_find_meeting_times`/`gcal_list_events` for Google)
 
 3. **Draft a reply** following the tone guide in [tone-guide.md](tone-guide.md):
    - Match the thread's tone
@@ -337,7 +373,7 @@ After all items are processed:
 
 ## Notes
 
-- **Never send emails** without explicit user approval. All email replies are drafts for the user to send from Outlook.
+- **Never send emails** without explicit user approval. All email replies are drafts for the user to send from their mail client. For Gmail, use `gmail_create_draft` to create drafts directly.
 - **Slack messages** can be sent directly if the user approves, as the Slack MCP tools support sending.
 - **Teams messages** are draft-only until Graph API permissions are granted.
 - If the user runs `/triage check` — only do Steps 0–3.5 (classify, present, and skip summary — no drafting).

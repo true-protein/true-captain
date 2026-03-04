@@ -1,6 +1,8 @@
-# True Utilities
+# True Captain
 
-A set of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills that triage your inbox, Slack, Asana, and Teams — classifying messages, surfacing what needs attention, and drafting replies so you can stay on top of communications without spending hours in Outlook.
+A set of [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills that triage your inbox, Slack, Asana, and Teams — classifying messages, surfacing what needs attention, and drafting replies so you can stay on top of communications without context-switching all day.
+
+Works with **Microsoft 365** (Outlook, Teams) and **Google Workspace** (Gmail, Google Calendar).
 
 Built by the team at [True Protein](https://www.trueprotein.com.au).
 
@@ -42,28 +44,35 @@ Every message is classified as **skip** (noise), **info_only** (FYI), **meeting_
 
 ## Quick Start
 
-### 1. Clone and install
+### Option A: One-liner install
 
 ```bash
-git clone https://github.com/trueprotein/true-utils.git
-cd true-utils
+bash <(curl -s https://raw.githubusercontent.com/true-protein/true-captain/main/install-remote.sh)
+```
+
+### Option B: Clone and install
+
+```bash
+git clone https://github.com/true-protein/true-captain.git
+cd true-captain
 ./install.sh        # Mac/Linux
 # or double-click install.bat on Windows
 ```
 
-This copies the skills to `~/.claude/skills/` so they work from any directory.
+Both options copy the skills to `~/.claude/skills/` so they work from any directory in Claude Code.
 
 ### 2. Connect your tools
 
-You need the following MCP connectors enabled in Claude Code:
+You need at least one email connector, plus any optional channels:
 
-| Connector | Used for |
-|-----------|----------|
-| **Microsoft 365** | Outlook email, calendar, Teams |
-| **Slack** | Channels, DMs, mentions |
-| **Asana** | Task assignments, mentions, project updates |
+| Connector | Platform | Used for |
+|-----------|----------|----------|
+| **Microsoft 365** | Microsoft | Outlook email, calendar, Teams |
+| **Gmail** | Google | Gmail, Google Calendar |
+| **Slack** | — | Channels, DMs, mentions |
+| **Asana** | — | Task assignments, mentions, project updates |
 
-Set these up via the Claude Code MCP connector marketplace.
+Set these up via the Claude Code MCP connector marketplace. You don't need both Microsoft 365 and Gmail — pick whichever your organisation uses.
 
 ### 3. Run the setup
 
@@ -113,9 +122,21 @@ Every message is sorted into one of four buckets:
 
 VIP senders (from your config) are always **action_required** and high priority.
 
+### Platform auto-detection
+
+The skills auto-detect which MCP connectors are available and use the right tools:
+
+| Function | Microsoft 365 | Google Workspace |
+|----------|--------------|-----------------|
+| Search email | `outlook_email_search` | `gmail_search_messages` |
+| Read email | `read_resource` | `gmail_read_message` |
+| Calendar | `outlook_calendar_search` | `gcal_list_events` |
+| Find availability | `find_meeting_availability` | `gcal_find_meeting_times` |
+| Create draft | Copy to Outlook | `gmail_create_draft` |
+
 ### Draft-only safety
 
-All email and Teams replies are **drafts only** — Claude never sends on your behalf. You review the draft and send it yourself.
+All email replies are **drafts only** — Claude never sends on your behalf without explicit approval. For Outlook, you review the draft and paste it. For Gmail, drafts are created directly in your Drafts folder via `gmail_create_draft`.
 
 Slack messages can be sent directly with your explicit approval.
 
@@ -130,7 +151,7 @@ Skipped items (notifications, newsletters, automated alerts) are grouped by sour
 Want me to summarise them for bulk cleanup?
 ```
 
-When `Mail.ReadWrite` permissions are available, auto-archive is supported.
+When write permissions are available (`Mail.ReadWrite` for Outlook, `Gmail.Modify` for Gmail), auto-archive is supported.
 
 ### Asana integration
 
@@ -146,29 +167,46 @@ The config controls:
 - **Scheduling preferences** — work hours, meeting buffer, slots to offer
 - **Communication tone** — external (professional/warm) vs internal (direct/casual)
 - **Channels** — which tools to include in `/triage`
+- **Email platform** — auto-detect, or force Microsoft 365 / Google
 
 See [`config/triage-config.example.md`](config/triage-config.example.md) for the full template.
 
-## Microsoft 365 Permissions
+## Permissions
 
-The skills work in **read-only mode** out of the box. For full functionality, an Entra ID admin can grant these delegated permissions:
+The skills work in **read-only mode** out of the box. For full functionality, additional permissions can be granted by your admin.
 
-| Permission | Enables |
-|------------|---------|
-| `Mail.Read` | Read inbox (likely already granted) |
-| `Mail.ReadWrite` | Auto-archive skipped emails, move to folders |
-| `Mail.Send` | Send replies directly from Claude |
-| `Calendars.Read` | Read calendar (likely already granted) |
-| `Calendars.ReadWrite` | Create calendar events for proposed meeting times |
-| `Chat.Read` | Read Teams chat messages |
+### Microsoft 365 (Entra ID delegated permissions)
 
-These are **delegated** permissions — Claude can only access what the signed-in user can access.
+| Permission | Required | Enables |
+|------------|----------|---------|
+| `Mail.Read` | Yes | Read inbox |
+| `Mail.ReadWrite` | Optional | Auto-archive skipped emails, move to folders |
+| `Mail.Send` | Optional | Send replies directly from Claude |
+| `Calendars.Read` | Yes | Read calendar |
+| `Calendars.ReadWrite` | Optional | Create calendar events for proposed meeting times |
+| `Chat.Read` | Optional | Read Teams chat messages |
+
+These are **delegated** permissions — Claude can only access what the signed-in user can access. An Entra ID admin grants these via **Identity > Applications > Enterprise applications > [app] > Permissions > Grant admin consent**.
+
+### Google Workspace (OAuth scopes)
+
+| Scope | Required | Enables |
+|-------|----------|---------|
+| `gmail.readonly` | Yes | Read inbox |
+| `gmail.modify` | Optional | Archive skipped emails, manage labels |
+| `gmail.compose` | Optional | Create draft replies |
+| `gmail.send` | Optional | Send replies directly from Claude |
+| `calendar.readonly` | Yes | Read calendar |
+| `calendar.events` | Optional | Create calendar events for proposed meeting times |
+
+Google scopes are granted per-user during OAuth consent. A Workspace admin can pre-approve scopes via **Admin Console > Security > API controls > App access control**.
 
 ## Project Structure
 
 ```
 install.sh                        # Installer (Mac/Linux)
 install.bat                       # Installer (Windows)
+install-remote.sh                 # One-liner remote installer
 VERSION                           # Current version
 .claude/
   skills/
@@ -193,7 +231,7 @@ config/
 ## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) with MCP connector support
-- Microsoft 365 account (for Outlook/Teams)
+- **One of:** Microsoft 365 account (Outlook/Teams) **or** Google Workspace account (Gmail/Calendar)
 - Slack workspace (optional)
 - Asana workspace (optional)
 

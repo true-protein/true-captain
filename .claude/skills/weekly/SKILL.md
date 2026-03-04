@@ -28,7 +28,9 @@ Read `~/.claude/triage-config.md` for timezone and preferences.
 
 ### Email Volume & Threads
 
-Search for all emails in the date range:
+Search for all emails in the date range. Detect which email connector is available.
+
+**If Microsoft 365 (Outlook):**
 
 ```
 outlook_email_search:
@@ -38,14 +40,31 @@ outlook_email_search:
   limit: 50
 ```
 
-For emails that appear to need follow-up or are from VIP senders, read full content:
+Read full content:
 
 ```
 read_resource:
   uri: "mail:///messages/{messageId}"
 ```
 
+**If Google Workspace (Gmail):**
+
+```
+gmail_search_messages:
+  q: "in:inbox after:{week_start_yyyy/mm/dd} before:{week_end_yyyy/mm/dd}"
+  maxResults: 50
+```
+
+Read full content:
+
+```
+gmail_read_message:
+  messageId: "{messageId}"
+```
+
 ### Calendar
+
+**If Microsoft 365 (Outlook Calendar):**
 
 ```
 outlook_calendar_search:
@@ -53,6 +72,15 @@ outlook_calendar_search:
   afterDateTime: "{week_start}"
   beforeDateTime: "{week_end}"
   limit: 50
+```
+
+**If Google Workspace (Google Calendar):**
+
+```
+gcal_list_events:
+  timeMin: "{week_start_iso}"
+  timeMax: "{week_end_iso}"
+  maxResults: 50
 ```
 
 ### Slack Highlights
