@@ -61,7 +61,19 @@
 
 <!-- Skipped emails are moved to these folders for inbox hygiene.
      The classification rules auto-detect which folder each email belongs in.
-     Customise the folder names below, or add/remove categories. -->
+     Customise the folder names below, or add/remove categories.
+
+     IMPORTANT: /triage can't create folders — the MCP connectors don't support it.
+     Create these folders manually in Outlook or Gmail. If a folder doesn't exist,
+     /triage moves those emails to Archive instead (still clears your inbox).
+     Run /true setup to check which folders exist in your mailbox.
+
+     Common aliases are also accepted:
+     - Marketing → Newsletters, Promos
+     - Payments → Orders, Invoices, Billing
+     - Reports → Analytics, Dashboards
+     - Calendar → Meeting Responses
+     - Notifications → Alerts -->
 
 - **Notifications:** GitHub, Jira, Confluence, Asana, Slack, Linear
 - **Marketing:** newsletters, promos, vendor marketing

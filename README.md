@@ -135,13 +135,14 @@ The skills auto-detect which MCP connectors are available and use the right tool
 |----------|--------------|-----------------|
 | Search email | `outlook_email_search` | `gmail_search_messages` |
 | Read email | `read_resource` | `gmail_read_message` |
+| Create draft | `create-draft-email` (Softeria MCP) | `gmail_create_draft` |
+| Move email | `move-mail-message` (Softeria MCP) | Gmail labels |
 | Calendar events | `outlook_calendar_search` | `gcal_list_events` |
 | Find availability | `find_meeting_availability` | `gcal_find_meeting_times` |
-| Create draft | Copy to Outlook | `gmail_create_draft` |
 
 ### Draft-only safety
 
-All email replies are **drafts only** — Claude never sends on your behalf without explicit approval. For Outlook, you review the draft and paste it. For Gmail, drafts are created directly in your Drafts folder via `gmail_create_draft`.
+All email replies are **drafts only** — Claude never sends on your behalf without explicit approval. For Outlook, drafts are created directly in your Drafts folder via the Softeria MCP server. For Gmail, drafts are created via `gmail_create_draft`. Either way, you review and send from your mail client.
 
 Slack messages can be sent directly with your explicit approval.
 

@@ -4,3 +4,6 @@ Thumbs.db
 
 # User-specific config (lives in ~/.claude/, not in repo)
 triage-config.md
+
+# Install artifacts (contains tenant-specific config)
+install/

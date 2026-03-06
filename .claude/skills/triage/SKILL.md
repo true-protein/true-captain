@@ -308,10 +308,13 @@ If skip_count > 0, present skipped emails grouped by target folder:
 > → [Move all] [Show details] [Leave in inbox]
 
 **If "Move all":**
-- Attempt to move emails to their target folders using available tools
-- Create folders that don't exist yet
-- If it succeeds → report: "Moved {N} emails to {X} folders."
-- If permission error → degrade gracefully:
+1. **Check available folders** first — call `list-mail-folders` (M365) or `gmail_list_labels` (Gmail) to discover which target folders actually exist. For Outlook, also check Inbox subfolders with `list-mail-child-folders` since users often create folders inside Inbox. Match both exact names and common aliases (e.g. "Newsletters" counts as "Marketing", "Orders" counts as "Payments").
+2. **Move emails** to their target folders where the folder exists.
+3. **Fall back to Archive** for any emails whose target folder doesn't exist. The MCP connectors can't create mail folders, so Archive (which always exists) is the universal fallback.
+4. **Report results:**
+   - If all target folders existed → "Moved {N} emails to {X} folders."
+   - If some folders were missing → "Moved {N} emails: {X} to specific folders, {Y} to Archive (folders not found: {list}). Run `/true setup` or create these folders in your mail client to enable finer sorting."
+5. **If permission error** → degrade gracefully:
 
   > "I'd move these {N} emails for you, but `Mail.ReadWrite` (Outlook) / `gmail.modify` (Gmail) isn't enabled.
   > Here's the breakdown so you can sort them manually:

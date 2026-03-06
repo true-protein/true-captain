@@ -34,7 +34,7 @@ fi
 mkdir -p "$SKILLS_TARGET"
 
 # Copy each skill
-SKILLS=(true triage mail reply reply-with-availability weekly)
+SKILLS=(true setup triage mail reply reply-with-availability weekly)
 INSTALLED=0
 
 for skill in "${SKILLS[@]}"; do

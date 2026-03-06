@@ -19,7 +19,14 @@ Each skipped email is routed to a target folder based on its type. The folder ma
 
 After classification, skipped emails are grouped by target folder and presented in Step 3.5 for the user to confirm before moving.
 
-**Folder creation:** If a target folder doesn't exist, create it automatically (when permissions allow).
+**Missing folders:** The MS365 and Gmail MCP connectors cannot create mail folders. If a target folder doesn't exist, fall back to **Archive** (which always exists). Before moving, check available folders with `list-mail-folders` (M365) or `gmail_list_labels` (Gmail). Note any missing folders in the hygiene summary so the user knows to create them manually if they want finer sorting in future runs.
+
+Recommended folders (created via `/true setup` or manually in the mail client):
+- **Notifications** — GitHub, Jira, Asana, Slack, automated alerts
+- **Marketing** — newsletters, promos, vendor emails
+- **Calendar** — meeting responses, invites
+- **Reports** — automated reports, build alerts
+- **Payments** — invoices, receipts from billing systems
 
 ## 2. info_only (show summary, no reply needed)
 
